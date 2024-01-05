@@ -8,49 +8,64 @@ var express = require("express");
 var routes = express.Router()
 
 
-// ----- prodcut model -----
+// ----- product model -----
 
-var prodcut = require("../models/product")
-
-
-// ----- prodcut controller -----
-
-var prodcutController = require("../controllers/productController")
+var product = require("../models/product")
 
 
-// ----- add prodcut page -----
+// ----- product controller -----
 
-routes.get("/add_product", prodcutController.add_prodcut)
-
-
-// ----- insert prodcut -----
-
-// routes.post("/insert_prodcut", prodcutController.insert_prodcut)
+var productController = require("../controllers/productController")
 
 
-// ----- view prodcut page -----
+// ----- add product page -----
 
-// routes.get("/view_prodcut", prodcutController.view_prodcut)
+routes.get("/add_product", productController.add_product)
+
+
+// ----- insert product -----
+
+routes.post("/insert_product", product.uploadproductImg, productController.insert_product)
+
+
+// ----- view product page -----
+
+routes.get("/view_product", productController.view_product)
 
 
 // ----- set deactive -----
 
-// routes.get("/set_deactive", prodcutController.set_deactive)
+routes.get("/set_deactive", productController.set_deactive)
 
 
 // ----- set active -----
 
-// routes.get("/set_active", prodcutController.set_active)
+routes.get("/set_active", productController.set_active)
 
 
-// ----- delete prodcut -----
+// ----- deleteSpecificImg -----
 
-// routes.get("/delete_prodcut", prodcutController.delete_prodcut)
+routes.post("/deleteSpecificImg", productController.deleteSpecificImg)
+
+
+// ----- delete product -----
+
+routes.get("/delete_product", productController.delete_product)
+
+
+// ----- edit product -----
+
+routes.get("/edit_product", productController.edit_product)
+
+
+// ----- update product -----
+
+routes.post("/update_product",product.uploadproductImg, productController.update_product)
 
 
 // ----- delete many -----
 
-// routes.post("/delete_many", prodcutController.delete_many)
+routes.post("/delete_many", productController.delete_many)
 
 
 // ----- export -----

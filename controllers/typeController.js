@@ -80,10 +80,31 @@ module.exports.view_type = async (req, res) => {
 
     try {
 
-        var typeData = await type.find({}).populate(["categoryId", "subcategoryId","extracategoryId"]).exec();
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2
+
+        var typeData = await type.find({
+            "type_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).populate(["categoryId", "subcategoryId", "extracategoryId"]).limit(perPage).skip(perPage * page).exec();
+
+        var totalDocument = await type.find({
+            "type_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).countDocuments()
+
         if (typeData) {
             return res.render("type/view_type", {
-                "typeData": typeData
+                "typeData": typeData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -151,26 +172,23 @@ module.exports.set_active = async (req, res) => {
 }
 
 
-// ----- delete type -----
+// ----- edit type -----
 
-module.exports.delete_type = async (req, res) => {
+module.exports.edit_type = async (req, res) => {
 
     try {
 
-        var oldData = await type.findById(req.query.id);
+        var oldData = await type.findById(req.query.id).populate(["categoryId", "subcategoryId", "extracategoryId"]).exec();
+        var categoryData = await category.find({ isActive: true })
+        var subcategoryData = await subcategory.find({ isActive: true })
+        var extracategoryData = await extracategory.find({ isActive: true })
         if (oldData) {
-
-            var deleteData = await type.findByIdAndDelete(req.query.id);
-
-            if (deleteData) {
-                console.log("data delete");
-                return res.redirect("back")
-            }
-            else {
-                console.log("data not delete");
-                return res.redirect("back")
-            }
-
+            return res.render("type/update_type", {
+                type: oldData,
+                categoryData: categoryData,
+                subcategoryData: subcategoryData,
+                extracategoryData: extracategoryData
+            })
 
         }
         else {
@@ -186,6 +204,27 @@ module.exports.delete_type = async (req, res) => {
 
 }
 
+
+// ----- update type -----
+
+module.exports.update_type = async (req, res) => {
+    try {
+        req.body.updatedDate = new Date().toLocaleString();
+
+        var update = await type.findByIdAndUpdate(req.body.editId, req.body);
+        if (update) {
+            return res.redirect("/admin/type/view_type")
+        }
+        else {
+            console.log("not update");
+            return res.redirect("back")
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
+}
 
 // ----- delete many -----
 

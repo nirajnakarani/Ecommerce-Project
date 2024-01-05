@@ -3,6 +3,36 @@
 var admin = require("../models/admin");
 
 
+// ----- category model -----
+
+var category = require("../models/category");
+
+
+// ----- subcategory model -----
+
+var subcategory = require("../models/subcategory");
+
+
+// ----- extracategory model -----
+
+var extracategory = require("../models/extracategory");
+
+
+// ----- brand model -----
+
+var brand = require("../models/brand");
+
+
+// ----- type model -----
+
+var type = require("../models/type");
+
+
+// ----- product model -----
+
+var product = require("../models/product");
+
+
 // ----- path -----
 
 var path = require("path")
@@ -16,8 +46,6 @@ var fs = require("fs")
 // ----- nodemailer -----
 
 var nodemailer = require("nodemailer");
-const e = require("express");
-const { emit } = require("process");
 
 
 // ----- login -----
@@ -57,7 +85,38 @@ module.exports.login_admin = async (req, res) => {
 module.exports.dashboard = async (req, res) => {
 
     try {
-        return res.render("admin/dashboard")
+        var search_bar = "";
+
+        if (req.query.search_bar) {
+            search_bar = req.query.search_bar
+        }
+
+        var categoryData = await category.find({})
+        var subcategoryData = await subcategory.find({})
+        var extracategoryData = await extracategory.find({})
+        var brandData = await brand.find({})
+        var typeData = await type.find({})
+
+        var productData = await product.find({})
+
+        var searchproductData = "";
+        if (search_bar) {
+            searchproductData = await product.find({
+                "title": { $regex: ".*" + search_bar + ".*", $options: "i" }
+            }).populate(["categoryId", "subcategoryId", "extracategoryId", "brandId", "typeId"])
+        }
+
+        var recentproductData = await product.find({}).sort({ "_id": -1 }).limit(5)
+        return res.render("admin/dashboard", {
+            categoryData: categoryData,
+            subcategoryData: subcategoryData,
+            extracategoryData: extracategoryData,
+            brandData: brandData,
+            typeData: typeData,
+            productData: productData,
+            searchproductData: searchproductData,
+            recentproductData: recentproductData
+        })
 
     }
     catch (err) {
@@ -130,11 +189,37 @@ module.exports.view_admin = async (req, res) => {
 
     try {
 
-        var adminData = await admin.find({});
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2;
+        var adminData = await admin.find({
+            $or: [
+                { "name": { $regex: ".*" + search + ".*", $options: "i" } },
+                { "email": { $regex: ".*" + search + ".*", $options: "i" } },
+                { "gender": { $regex: ".*" + search + ".*", $options: "i" } }
+            ]
+        }).limit(perPage).skip(perPage * page);
+        var totalDocument = await admin.find({
+            $or: [
+                { "name": { $regex: ".*" + search + ".*", $options: "i" } },
+                { "email": { $regex: ".*" + search + ".*", $options: "i" } },
+                { "gender": { $regex: ".*" + search + ".*", $options: "i" } }
+            ]
+        }).countDocuments()
         if (adminData) {
 
             return res.render("admin/view_admin", {
-                "adminData": adminData
+                "adminData": adminData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -248,43 +333,6 @@ module.exports.delete_admin = async (req, res) => {
 }
 
 
-// ----- delete many -----
-
-module.exports.delete_many = async (req, res) => {
-    try {
-
-        var abc = await admin.deleteMany({ _id: { $in: req.body.deleteAll } });
-        if (abc) {
-            return res.redirect("back")
-
-        }
-        else {
-            console.log("data not delete");
-            return res.redirect("back")
-        }
-
-    }
-    catch (err) {
-        console.log(err);
-        return res.redirect("back")
-    }
-}
-
-
-// ----- profile -----
-
-module.exports.profile = async (req, res) => {
-    try {
-        return res.render("admin/profile")
-
-    }
-    catch (err) {
-        console.log(err);
-        return res.redirect("back")
-    }
-}
-
-
 // ----- edit admin page -----
 
 module.exports.edit_admin = async (req, res) => {
@@ -318,7 +366,6 @@ module.exports.update_admin = async (req, res) => {
     try {
         var oldData = await admin.findById(req.body.editId);
         if (oldData) {
-
 
             if (req.file) {
                 if (oldData.admin_img) {
@@ -370,6 +417,124 @@ module.exports.update_admin = async (req, res) => {
         return res.redirect("back")
     }
 
+}
+
+
+// ----- delete many -----
+
+module.exports.delete_many = async (req, res) => {
+    try {
+        req.body.deleteAll.map(async (v) => {
+            var adminData = await admin.findById(v);
+            if (adminData) {
+                if (adminData.admin_img) {
+                    var fullPath = path.join(__dirname, "..", adminData.admin_img)
+                    await fs.unlinkSync(fullPath)
+                }
+            }
+        })
+        var abc = await admin.deleteMany({ _id: { $in: req.body.deleteAll } });
+        if (abc) {
+            return res.redirect("back")
+
+        }
+        else {
+            console.log("data not delete");
+            return res.redirect("back")
+        }
+
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
+}
+
+
+// ----- profile -----
+
+module.exports.profile = async (req, res) => {
+    try {
+        return res.render("admin/profile")
+
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
+}
+
+
+// ----- change password -----
+
+module.exports.change_password = async (req, res) => {
+    try {
+        return res.render("admin/change_password")
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
+}
+
+
+// ----- update password -----
+
+module.exports.update_password = async (req, res) => {
+    try {
+        var adminSession = req.user;
+        if (adminSession) {
+
+            if (adminSession.password == req.body.password) {
+
+                if (req.body.password != req.body.npass) {
+
+                    if (req.body.npass == req.body.cpass) {
+                        var adminData = await admin.findById(adminSession._id);
+                        if (adminData) {
+                            var editPass = await admin.findByIdAndUpdate(adminData.id, { password: req.body.npass });
+                            if (editPass) {
+                                req.session.destroy();
+                                return res.redirect("/admin/")
+                            }
+                            else {
+                                console.log("password not change");
+                                return res.redirect("back")
+                            }
+                        }
+                        else {
+                            console.log("adminData not found");
+                            return res.redirect("back")
+                        }
+                    }
+                    else {
+                        console.log("both pass not match");
+                        return res.redirect("back")
+                    }
+
+                }
+                else {
+                    console.log("current and new pass are same");
+                    return res.redirect("back")
+                }
+
+            }
+            else {
+                console.log("current password not match");
+                return res.redirect("back")
+            }
+
+        }
+        else {
+            console.log("session not found");
+            return res.redirect("back")
+        }
+
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
 }
 
 

@@ -79,11 +79,31 @@ module.exports.insert_brand = async (req, res) => {
 module.exports.view_brand = async (req, res) => {
 
     try {
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2;
 
-        var brandData = await brand.find({}).populate(["categoryId", "subcategoryId","extracategoryId"]).exec();
+        var brandData = await brand.find({
+            "brand_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).populate(["categoryId", "subcategoryId", "extracategoryId"]).limit(perPage).skip(perPage * page).exec();
+
+        var totalDocument = await brand.find({
+            "brand_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).countDocuments()
+
         if (brandData) {
             return res.render("brand/view_brand", {
-                "brandData": brandData
+                "brandData": brandData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -151,26 +171,23 @@ module.exports.set_active = async (req, res) => {
 }
 
 
-// ----- delete brand -----
+// ----- edit brand -----
 
-module.exports.delete_brand = async (req, res) => {
+module.exports.edit_brand = async (req, res) => {
 
     try {
 
-        var oldData = await brand.findById(req.query.id);
+        var oldData = await brand.findById(req.query.id).populate(["categoryId", "subcategoryId", "extracategoryId"]).exec();
+        var categoryData = await category.find({ isActive: true })
+        var subcategoryData = await subcategory.find({ isActive: true })
+        var extracategoryData = await extracategory.find({ isActive: true })
         if (oldData) {
-
-            var deleteData = await brand.findByIdAndDelete(req.query.id);
-
-            if (deleteData) {
-                console.log("data delete");
-                return res.redirect("back")
-            }
-            else {
-                console.log("data not delete");
-                return res.redirect("back")
-            }
-
+            return res.render("brand/update_brand", {
+                brand: oldData,
+                categoryData: categoryData,
+                subcategoryData: subcategoryData,
+                extracategoryData: extracategoryData
+            })
 
         }
         else {
@@ -184,6 +201,28 @@ module.exports.delete_brand = async (req, res) => {
         return res.redirect("back")
     }
 
+}
+
+
+// ----- update brand -----
+
+module.exports.update_brand = async (req, res) => {
+    try {
+        req.body.updatedDate = new Date().toLocaleString();
+
+        var update = await brand.findByIdAndUpdate(req.body.editId, req.body);
+        if (update) {
+            return res.redirect("/admin/brand/view_brand")
+        }
+        else {
+            console.log("not update");
+            return res.redirect("back")
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
 }
 
 

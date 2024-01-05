@@ -43,9 +43,14 @@ routes.get("/set_deactive", extracategoryController.set_deactive)
 routes.get("/set_active", extracategoryController.set_active)
 
 
-// ----- delete extracategory -----
+// ----- edit extracategory -----
 
-routes.get("/delete_extracategory", extracategoryController.delete_extracategory)
+routes.get("/edit_extracategory", extracategoryController.edit_extracategory)
+
+
+// ----- update extracategory -----
+
+routes.post("/update_extracategory", extracategoryController.update_extracategory)
 
 
 // ----- delete many -----
@@ -56,6 +61,11 @@ routes.post("/delete_many", extracategoryController.delete_many)
 // ----- get extra category -----
 
 routes.post("/getextracat", extracategoryController.getextracat)
+
+
+// ----- get brand type -----
+
+routes.post("/getbrandType", extracategoryController.getbrandType)
 
 
 // ----- export -----

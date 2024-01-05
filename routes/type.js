@@ -43,9 +43,14 @@ routes.get("/set_deactive", typeController.set_deactive)
 routes.get("/set_active", typeController.set_active)
 
 
-// ----- delete type -----
+// ----- edit type -----
 
-routes.get("/delete_type", typeController.delete_type)
+routes.get("/edit_type", typeController.edit_type)
+
+
+// ----- update type -----
+
+routes.post("/update_type", typeController.update_type)
 
 
 // ----- delete many -----

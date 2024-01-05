@@ -7,7 +7,21 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">View Admin</h5>
+
+                            <div class="view-search-bar-main">
+                                <h5 class="card-title">View Admin</h5>
+
+                                <div class="view-search-bar" style="display: flex;">
+                                    <form class="view-search-bar">
+                                        <label for="search">Search</label>
+                                        <input required="" autocomplete="off" class="input" id="search" name="search"
+                                            value="<%= search %>">
+                                        <span class="caret"></span>
+                                    </form>
+                                    <a class="button" href="/admin/view_admin">Cancel</a>
+                                </div>
+                            </div>
+
                             <form action="/admin/delete_many" method="post">
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover table-striped">
@@ -134,6 +148,15 @@
                                     </table>
                                 </div>
                             </form>
+
+                            <ul class="pagination justify-content-center" style="margin-top: 30px;">
+                                <%for(var i=0;i<totalDocument;i++){%>
+                                    <li class="page-item"><a class="page-link"
+                                            href="?page=<%= i %>&seach=<%= search %>">
+                                            <%= i+1 %>
+                                        </a></li>
+                                    <%}%>
+                            </ul>
                         </div>
                     </div>
                 </div>

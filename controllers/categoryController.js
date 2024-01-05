@@ -52,12 +52,30 @@ module.exports.insert_category = async (req, res) => {
 module.exports.view_category = async (req, res) => {
 
     try {
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2
 
-        var categoryData = await category.find({});
+        var categoryData = await category.find({
+            "category_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).limit(perPage).skip(perPage * page);
+        var totalDocument = await category.find({
+            "category_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).countDocuments()
         if (categoryData) {
 
             return res.render("category/view_category", {
-                "categoryData": categoryData
+                "categoryData": categoryData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -125,26 +143,17 @@ module.exports.set_active = async (req, res) => {
 }
 
 
-// ----- delete category -----
+// ----- edit category -----
 
-module.exports.delete_category = async (req, res) => {
+module.exports.edit_category = async (req, res) => {
 
     try {
 
         var oldData = await category.findById(req.query.id);
         if (oldData) {
-
-            var deleteData = await category.findByIdAndDelete(req.query.id);
-
-            if (deleteData) {
-                console.log("data delete");
-                return res.redirect("back")
-            }
-            else {
-                console.log("data not delete");
-                return res.redirect("back")
-            }
-
+            return res.render("category/update_category", {
+                category: oldData
+            })
 
         }
         else {
@@ -160,6 +169,28 @@ module.exports.delete_category = async (req, res) => {
 
 }
 
+
+// ----- update category -----
+
+module.exports.update_category = async (req, res) => {
+    try {
+        req.body.updatedDate = new Date().toLocaleString();
+
+        var update = await category.findByIdAndUpdate(req.body.editId, req.body);
+        if (update) {
+            return res.redirect("/admin/category/view_category")
+        }
+        else {
+            console.log("not updated")
+            return res.redirect("back")
+        }
+
+    }
+    catch (err) {
+        console.log(err)
+        return res.redirect("back")
+    }
+}
 
 // ----- delete many -----
 

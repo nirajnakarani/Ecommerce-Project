@@ -43,9 +43,14 @@ routes.get("/set_deactive", subcategoryController.set_deactive)
 routes.get("/set_active", subcategoryController.set_active)
 
 
-// ----- delete subcategory -----
+// ----- edit subcategory -----
 
-routes.get("/delete_subcategory", subcategoryController.delete_subcategory)
+routes.get("/edit_subcategory", subcategoryController.edit_subcategory)
+
+
+// ----- update subcategory -----
+
+routes.post("/update_subcategory", subcategoryController.update_subcategory)
 
 
 // ----- delete many -----

@@ -66,11 +66,31 @@ module.exports.insert_subcategory = async (req, res) => {
 module.exports.view_subcategory = async (req, res) => {
 
     try {
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2
 
-        var subcategoryData = await subcategory.find({}).populate("categoryId").exec();
+        var subcategoryData = await subcategory.find({
+            "subcategory_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).populate("categoryId").limit(perPage).skip(perPage * page).exec();
+
+        var totalDocument = await subcategory.find({
+            "subcategory_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).countDocuments()
+
         if (subcategoryData) {
             return res.render("subcategory/view_subcategory", {
-                "subcategoryData": subcategoryData
+                "subcategoryData": subcategoryData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -138,26 +158,19 @@ module.exports.set_active = async (req, res) => {
 }
 
 
-// ----- delete subcategory -----
+// ----- edit subcategory -----
 
-module.exports.delete_subcategory = async (req, res) => {
+module.exports.edit_subcategory = async (req, res) => {
 
     try {
 
-        var oldData = await subcategory.findById(req.query.id);
+        var oldData = await subcategory.findById(req.query.id).populate("categoryId").exec();
+        var categoryData = await category.find({ isActive: true })
         if (oldData) {
-
-            var deleteData = await subcategory.findByIdAndDelete(req.query.id);
-
-            if (deleteData) {
-                console.log("data delete");
-                return res.redirect("back")
-            }
-            else {
-                console.log("data not delete");
-                return res.redirect("back")
-            }
-
+            return res.render("subcategory/update_subcategory", {
+                subcategory: oldData,
+                categoryData: categoryData
+            })
 
         }
         else {
@@ -171,6 +184,28 @@ module.exports.delete_subcategory = async (req, res) => {
         return res.redirect("back")
     }
 
+}
+
+
+// ----- update subcategory -----
+
+module.exports.update_subcategory = async (req, res) => {
+    try {
+        req.body.updatedDate = new Date().toLocaleString();
+
+        var update = await subcategory.findByIdAndUpdate(req.body.editId, req.body);
+        if (update) {
+            return res.redirect("/admin/subcategory/view_subcategory")
+        }
+        else {
+            console.log("not update");
+            return res.redirect("back")
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
 }
 
 

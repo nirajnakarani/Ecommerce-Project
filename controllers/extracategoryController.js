@@ -13,6 +13,16 @@ var subcategory = require("../models/subcategory");
 var extracategory = require("../models/extracategory");
 
 
+// ----- brand model -----
+
+var brand = require("../models/brand");
+
+
+// ----- type model -----
+
+var type = require("../models/type");
+
+
 // ----- add extracategory page -----
 
 module.exports.add_extracategory = async (req, res) => {
@@ -73,10 +83,32 @@ module.exports.view_extracategory = async (req, res) => {
 
     try {
 
-        var extracategoryData = await extracategory.find({}).populate(["categoryId", "subcategoryId"]).exec();
+        var search = "";
+        if (req.query.search) {
+            search = req.query.search
+        }
+        if (req.query.page) {
+            page = req.query.page
+        }
+        else {
+            page = 0
+        }
+        var perPage = 2
+
+
+        var extracategoryData = await extracategory.find({
+            "extracategory_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).populate(["categoryId", "subcategoryId"]).limit(perPage).skip(perPage * page).exec();
+
+        var totalDocument = await extracategory.find({
+            "extracategory_name": { $regex: ".*" + search + ".*", $options: "i" }
+        }).countDocuments()
+
         if (extracategoryData) {
             return res.render("extracategory/view_extracategory", {
-                "extracategoryData": extracategoryData
+                "extracategoryData": extracategoryData,
+                search: search,
+                totalDocument: Math.ceil(totalDocument / perPage)
             })
         }
         else {
@@ -144,26 +176,21 @@ module.exports.set_active = async (req, res) => {
 }
 
 
-// ----- delete extracategory -----
+// ----- edit extracategory -----
 
-module.exports.delete_extracategory = async (req, res) => {
+module.exports.edit_extracategory = async (req, res) => {
 
     try {
 
-        var oldData = await extracategory.findById(req.query.id);
+        var oldData = await extracategory.findById(req.query.id).populate(["categoryId", "subcategoryId"]).exec();
+        var categoryData = await category.find({ isActive: true })
+        var subcategoryData = await subcategory.find({ isActive: true })
         if (oldData) {
-
-            var deleteData = await extracategory.findByIdAndDelete(req.query.id);
-
-            if (deleteData) {
-                console.log("data delete");
-                return res.redirect("back")
-            }
-            else {
-                console.log("data not delete");
-                return res.redirect("back")
-            }
-
+            return res.render("extracategory/update_extracategory", {
+                extracategory: oldData,
+                categoryData: categoryData,
+                subcategoryData: subcategoryData
+            })
 
         }
         else {
@@ -177,6 +204,28 @@ module.exports.delete_extracategory = async (req, res) => {
         return res.redirect("back")
     }
 
+}
+
+
+// ----- update extracategory -----
+
+module.exports.update_extracategory = async (req, res) => {
+    try {
+        req.body.updatedDate = new Date().toLocaleString();
+
+        var update = await extracategory.findByIdAndUpdate(req.body.editId, req.body);
+        if (update) {
+            return res.redirect("/admin/extracategory/view_extracategory")
+        }
+        else {
+            console.log("not update");
+            return res.redirect("back")
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.redirect("back")
+    }
 }
 
 
@@ -227,6 +276,41 @@ module.exports.getextracat = async (req, res) => {
     }
     catch (err) {
         console.log(err);
+        return res.redirect("back")
+    }
+}
+
+
+// ----- get brand type -----
+
+module.exports.getbrandType = async (req, res) => {
+
+    try {
+
+        var brandData = await brand.find({ extracategoryId: req.body.extracategoryId, isActive: true });
+        var typeData = await type.find({ extracategoryId: req.body.extracategoryId, isActive: true });
+        if (brandData) {
+
+            var optBrand = `<option value="">-- - --</option>`;
+            var optType = `<option value="">-- - --</option>`;
+
+            brandData.map((v, i) => {
+                optBrand += `<option value="${v.id}">${v.brand_name}</option>`
+            })
+
+            typeData.map((v, i) => {
+                optType += `<option value="${v.id}">${v.type_name}</option>`
+            })
+
+            return res.json([optBrand, optType])
+        }
+        else {
+            console.log("brand not found")
+        }
+
+    }
+    catch (err) {
+        console.log(err)
         return res.redirect("back")
     }
 }

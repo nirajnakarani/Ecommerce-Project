@@ -3,9 +3,14 @@
 var mongoose = require("mongoose");
 
 
-// ----- product img path -----
+// ----- single product img path -----
 
-var productImgPath = "/uploads/productImg";
+var singleImgPath = "/uploads/productImg/single";
+
+
+// ----- multi product img path -----
+
+var multiImgPath = "/uploads/productImg/multi";
 
 
 // ----- multer -----
@@ -70,8 +75,12 @@ var productSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    product_img: {
+    single_img: {
         type: String,
+        required: true
+    },
+    multi_img: {
+        type: Array,
         required: true
     },
     isActive: {
@@ -93,22 +102,32 @@ var productSchema = mongoose.Schema({
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, "..", productImgPath))
+        if (file.fieldname == "single_img") {
+            cb(null, path.join(__dirname, "..", singleImgPath))
+        }
+        else {
+            cb(null, path.join(__dirname, "..", multiImgPath))
+        }
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + "-" + Date.now())
+        cb(null, file.fieldname + "-" + Math.random() * 1000000)
     }
 })
 
 
 // ----- single img -----
 
-productSchema.statics.uploadproductImg = multer({ storage: storage }).single("product_img");
+productSchema.statics.uploadproductImg = multer({ storage: storage }).fields([{ name: "single_img", maxCount: 1 }, { name: "multi_img", maxCount: 5 }])
 
 
-// ----- export product img path -----
+// ----- export single product img path -----
 
-productSchema.statics.productImgPath = productImgPath;
+productSchema.statics.singleImgPath = singleImgPath;
+
+
+// ----- export single product img path -----
+
+productSchema.statics.multiImgPath = multiImgPath;
 
 
 // ----- table  -----

@@ -41,7 +41,7 @@
             <div class="brand-logo">
                 <a href="/admin">
                     <img src="/images/logo-icon.png" class="logo-icon" alt="logo icon">
-                    <h5 class="logo-text">Dashtreme Admin</h5>
+                    <h5 class="logo-text">E-Commerce Admin</h5>
                 </a>
             </div>
             <ul class="sidebar-menu do-nicescrol">
@@ -250,7 +250,7 @@
                 <li>
                     <a class="sub-btn">
                         <span>
-                            <i class="fa-solid fa-font"></i>
+                            <i class="fa-brands fa-product-hunt"></i>
                             <span>Product</span>
                         </span>
                         <span>
@@ -295,9 +295,12 @@
                     </li>
                     <li class="nav-item">
                         <form class="search-bar">
-                            <input type="text" class="form-control" placeholder="Enter keywords">
+                            <input type="text" class="form-control" placeholder="Enter keywords"name="search_bar" autocomplete="off">
                             <a href="javascript:void();"><i class="icon-magnifier"></i></a>
                         </form>
+                    </li>
+                    <li class="nav-item">
+                        <a class="button" href="/admin/dashboard">Cancel</a>
                     </li>
                 </ul>
 
@@ -350,7 +353,7 @@
                             <li class="dropdown-divider"></li>
                             <li class="dropdown-item"><i class="icon-wallet mr-2"></i>Account</li>
                             <li class="dropdown-divider"></li>
-                            <li class="dropdown-item"><i class="icon-settings mr-2"></i>Setting</li>
+                            <li class="dropdown-item"><i class="icon-settings mr-2"></i><a href="/admin/change_password">Change Password</a></li>
                             <li class="dropdown-divider"></li>
                             <li class="dropdown-item"><i class="icon-power mr-2"></i><a href="/admin/logout">Logout</a>
                             </li>

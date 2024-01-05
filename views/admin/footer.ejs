@@ -116,4 +116,40 @@
     })
   }
 
+
+  function getbrandType() {
+    var extracategory = document.getElementById("extracategory").value;
+    $.ajax({
+      url: "/admin/extracategory/getbrandType",
+      method: "post",
+      data: {
+        extracategoryId: extracategory
+      },
+      success: function (res) {
+        $("#brand").html(res[0])
+        $("#type").html(res[1])
+      }
+    })
+  }
+
+
+  function deleteSpecificImg(src, id, i, index) {
+    // var src = src;
+    // var id = id;
+    var deleteSpecificImg = confirm("Are you sure delete ?")
+    if (deleteSpecificImg) {
+      $.ajax({
+        url: "/admin/product/deleteSpecificImg",
+        method: "post",
+        data: {
+          src: src,
+          id: id,
+          index: i
+        },
+        success: function (res) {
+          $("#multi_img" + index).html(res)
+        }
+      })
+    }
+  }
 </script>

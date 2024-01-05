@@ -201,6 +201,50 @@ $("#FileInput").on('change', function (e) {
 });
 
 
+$("#FileInput1").on('change', function (e) {
+  var labelVal = $(".title1").text();
+  var oldfileName = $(this).val();
+  fileName = e.target.value.split('\\').pop();
+
+  if (oldfileName == fileName) { return false; }
+  var extension = fileName.split('.').pop();
+
+  if ($.inArray(extension, ['jpg', 'jpeg', 'png']) >= 0) {
+    $(".filelabel1 i").removeClass().addClass('fa fa-file-image-o');
+    $(".filelabel1 i, .filelabel1 .title1").css({ 'color': '#AAFF00' });
+    $(".filelabel1").css({ 'border': ' 2px solid #AAFF00' });
+  }
+  else if (extension == 'pdf') {
+    $(".filelabel1 i").removeClass().addClass('fa fa-file-pdf-o');
+    $(".filelabel1 i, .filelabel1 .title1").css({ 'color': 'red' });
+    $(".filelabel1").css({ 'border': ' 2px solid red' });
+
+  }
+  else if (extension == 'doc' || extension == 'docx') {
+    $(".filelabel1 i").removeClass().addClass('fa fa-file-word-o');
+    $(".filelabel1 i, .filelabel1 .title1").css({ 'color': '#00FFFF' });
+    $(".filelabel1").css({ 'border': ' 2px solid #00FFFF' });
+  }
+  else {
+    $(".filelabel1 i").removeClass().addClass('fa fa-file-o');
+    $(".filelabel1 i, .filelabel1 .title1").css({ 'color': 'black' });
+    $(".filelabel1").css({ 'border': ' 2px solid black' });
+  }
+
+  if (fileName) {
+    if (fileName.length > 10) {
+      $(".filelabel1 .title1").text(fileName.slice(0, 4) + '...' + extension);
+    }
+    else {
+      $(".filelabel1 .title1").text(fileName);
+    }
+  }
+  else {
+    $(".filelabel1 .title1").text(labelVal);
+  }
+});
+
+
 
 var checkAll = document.querySelector("#checkAll");
 var checkItem = document.querySelectorAll(".checkItem");

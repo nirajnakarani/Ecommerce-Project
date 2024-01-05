@@ -88,6 +88,16 @@ routes.post("/update_admin", admin.uploadAdminImg, adminController.update_admin)
 routes.get("/profile", passport.chekAuth, adminController.profile)
 
 
+// ----- change password page -----
+
+routes.get("/change_password", passport.chekAuth, adminController.change_password)
+
+
+// ----- update password -----
+
+routes.post("/update_password",adminController.update_password)
+
+
 // ----- logout -----
 
 routes.get("/logout", passport.chekAuth, adminController.logout)

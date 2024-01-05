@@ -43,9 +43,14 @@ routes.get("/set_deactive", brandController.set_deactive)
 routes.get("/set_active", brandController.set_active)
 
 
-// ----- delete brand -----
+// ----- edit brand -----
 
-routes.get("/delete_brand", brandController.delete_brand)
+routes.get("/edit_brand", brandController.edit_brand)
+
+
+// ----- update brand -----
+
+routes.post("/update_brand", brandController.update_brand)
 
 
 // ----- delete many -----
