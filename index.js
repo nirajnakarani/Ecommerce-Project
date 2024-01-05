@@ -15,11 +15,11 @@ var port = 9090;
 
 // ----- db -----
 
-// var db = require("./configs/mongoose")
-const mongoose = require("mongoose")
-mongoose.connect(`mongodb+srv://nakaraniniraj87580:niraj123@cluster0.oic2jbm.mongodb.net/`)
-    .then(() => console.log('Database Connected'))
-    .catch((err) => console.log(err));
+var db = require("./configs/mongoose")
+// const mongoose = require("mongoose")
+// mongoose.connect(`mongodb+srv://nakaraniniraj87580:niraj123@cluster0.oic2jbm.mongodb.net/`)
+//     .then(() => console.log('Database Connected'))
+//     .catch((err) => console.log(err));
 
 
 // ----- path -----
