@@ -15,7 +15,11 @@ var port = 9090;
 
 // ----- db -----
 
-var db = require("./configs/mongoose")
+// var db = require("./configs/mongoose")
+const mongoose = require("mongoose")
+mongoose.connect(`mongodb+srv://nakaraniniraj87580:niraj123@cluster0.oic2jbm.mongodb.net/`)
+    .then(() => console.log('Database Connected'))
+    .catch((err) => console.log(err));
 
 
 // ----- path -----
@@ -67,7 +71,8 @@ var passportLocal = require("./configs/passport-local")
 
 // ----- session -----
 
-var session = require("express-session")
+var session = require("express-session");
+const { title } = require("process");
 
 
 // ----- session object -----
